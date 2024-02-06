@@ -20,13 +20,13 @@ const expressServer = https.createServer({key, cert}, app);
 
 const io = new Server(expressServer, {
   cors: {
-    origin: ["http://localhost:5173","https://4a48-45-118-156-154.ngrok-free.app"],
+    origin: ["http://localhost:5173","https://2335-45-118-156-154.ngrok-free.app"],
   },
 });
 
 app.use(
   cors({
-    origin: ["http://localhost:5173","https://4a48-45-118-156-154.ngrok-free.app"],
+    origin: ["http://localhost:5173","https://2335-45-118-156-154.ngrok-free.app"],
   })
 );
 
@@ -129,7 +129,7 @@ io.on("connection", (socket) => {
           .to(socketToSendTo.socketId)
           .emit("receivedIceCandidateFromServer", iceCandidate);
         } else {
-          console.log(socketToSendTo,offerInOffers?.offererUserName)
+          console.log(socketToSendTo,offerInOffers?.offererUserName,userName)
         console.log("Ice candidate recieved but could not find offerer");
       }
     }

@@ -5,16 +5,19 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Landing from "./Pages/Landing";
 import Lobby from "./Pages/Lobby";
 import { SocketProvider } from "./Providers/Socket";
+import { RTCPeerProvider } from "./Providers/RTCPeer";
 
 function App() {
   return (
     <BrowserRouter>
-    <SocketProvider>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/lobby" element={<Lobby />} />
-      </Routes>
-    </SocketProvider>
+      <SocketProvider>
+        <RTCPeerProvider>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/lobby" element={<Lobby />} />
+          </Routes>
+        </RTCPeerProvider>
+      </SocketProvider>
     </BrowserRouter>
   );
 }
