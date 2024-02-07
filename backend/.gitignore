@@ -2,7 +2,6 @@
 *.crt
 *.key
 
-
 /node_modules
 dist-ssr
 *.local
