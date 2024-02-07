@@ -27,6 +27,7 @@ const io = new Server(expressServer, {
       "https://omegle-clone-tg2i.vercel.app"
     ],
     methods: ["GET", "POST"], // Add any other methods you're using
+    allowedHeaders: ["Access-Control-Allow-Origin"], // Add any custom headers you're using
     credentials: true // Allow credentials if needed
   }
 });
