@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 // const server = createServer(app);
 
-const key = fs.readFileSync("cert.key");
-const cert = fs.readFileSync("cert.crt");
+// const key = fs.readFileSync("cert.key");
+// const cert = fs.readFileSync("cert.crt");
 
 //we changed our express setup so we can use https
 //pass the key and cert to createServer on https
