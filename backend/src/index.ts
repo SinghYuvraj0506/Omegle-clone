@@ -24,7 +24,7 @@ const io = new Server(expressServer, {
     origin: [
       "http://localhost:5173",
       "https://6fa2-45-118-156-183.ngrok-free.app",
-      process.env.CLIENT_URL
+      "https://omegle-clone-tg2i.vercel.app"
     ],
   },
 });
@@ -34,7 +34,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://6fa2-45-118-156-183.ngrok-free.app",
-      process.env.CLIENT_URL
+      "https://omegle-clone-tg2i.vercel.app"
     ],
   })
 );
