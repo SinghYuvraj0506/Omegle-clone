@@ -26,8 +26,11 @@ const io = new Server(expressServer, {
       "https://6fa2-45-118-156-183.ngrok-free.app",
       "https://omegle-clone-tg2i.vercel.app"
     ],
-  },
+    methods: ["GET", "POST"], // Add any other methods you're using
+    credentials: true // Allow credentials if needed
+  }
 });
+
 
 app.use(
   cors({
