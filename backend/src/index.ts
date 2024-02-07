@@ -16,7 +16,8 @@ const cert = fs.readFileSync("cert.crt");
 
 //we changed our express setup so we can use https
 //pass the key and cert to createServer on https
-const expressServer = https.createServer({ key, cert }, app);
+// const expressServer = https.createServer({ key, cert }, app);
+const expressServer = createServer(app);
 
 const io = new Server(expressServer, {
   cors: {
