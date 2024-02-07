@@ -118,10 +118,7 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
   const getMyIceCandidate = useCallback((e: RTCPeerConnectionIceEvent) => {
     console.log("........My Ice candidate found!......");
     if (e.candidate) {
-        socketState?.socket.emit("sendIceCandidateToSignalingServer", {
-          iceCandidate: e.candidate,
-          didIOffer: isOfferer,
-        });
+        socketState?.socket.emit("sendIceCandidate", e.candidate);
       }
   }, []);
 

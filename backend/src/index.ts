@@ -1,145 +1,206 @@
 import express from "express";
 import { createServer } from "http";
 require("dotenv").config();
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import cors from "cors";
-import fs from "fs"
-import https from "https"
+import fs from "fs";
+import https from "https";
 
 const PORT = process.env.PORT || 8000;
 
 const app = express();
 // const server = createServer(app);
 
-const key = fs.readFileSync('cert.key');
-const cert = fs.readFileSync('cert.crt');
+const key = fs.readFileSync("cert.key");
+const cert = fs.readFileSync("cert.crt");
 
 //we changed our express setup so we can use https
 //pass the key and cert to createServer on https
-const expressServer = https.createServer({key, cert}, app);
+const expressServer = https.createServer({ key, cert }, app);
 
 const io = new Server(expressServer, {
   cors: {
-    origin: ["http://localhost:5173","https://2335-45-118-156-154.ngrok-free.app"],
+    origin: [
+      "http://localhost:5173",
+      "https://6fa2-45-118-156-183.ngrok-free.app",
+      process.env.CLIENT_URL
+    ],
   },
 });
 
 app.use(
   cors({
-    origin: ["http://localhost:5173","https://2335-45-118-156-154.ngrok-free.app"],
+    origin: [
+      "http://localhost:5173",
+      "https://6fa2-45-118-156-183.ngrok-free.app",
+      process.env.CLIENT_URL
+    ],
   })
 );
 
-const userNameToSocketMap = new Map();
-const sockettoUserNameMap = new Map();
+let usersToSocket = new Map<string, Socket>();
+let socketIdToUser = new Map<string, string>();
+let queue: string[] = [];
+let rooms = new Map<
+  string,
+  {
+    user1: string;
+    user2: string;
+  }
+>();
 
-interface Offer {
-  offererUserName: string;
-  offer: {};
-  offerIceCandidates: any[];
-  answer: {};
-  answererUserName: string;
-  answererIceCandidates: [];
-}
-
-let offers:any[] = [];
+let socketIdToRoomId = new Map<string, string>();
 
 // socket ----------------
 io.on("connection", (socket) => {
   console.log("New User connected", socket.id);
 
-  socket.on("addUser", (name) => {
-    userNameToSocketMap.set(name, socket.id);
-    sockettoUserNameMap.set(socket.id, name);
-    console.log("New User", name, "Connected");
-    console.log(userNameToSocketMap);
-  });
+  //  function one -------------------
+  const createRoom = (user1: string, user2: string) => {
+    // Generate a random 4-digit number between 1000 and 9999
+    const roomID = Math.floor(1000 + Math.random() * 9000).toString();
 
-  // calls -------------------------
-  socket.on("newOffer", (offer:{}) => {
-    console.log("newOffer created");
-    let obj = {
-      offererUserName: sockettoUserNameMap.get(socket.id),
-      offer,
-      offerIceCandidates: [],
-      answer: {},
-      answererUserName: "",
-      answererIceCandidates: [],
-    };
-    offers.push(obj);
-    socket.broadcast.emit("answerOffer", obj);
-  });
-
-  socket.on("newanswer", (offerObj,ackFunction) => {
-    console.log("answer created");
-    let client1SocketId = userNameToSocketMap.get(offerObj?.offererUserName);
-    let offerToUpdate = offers?.find(
-        (o) => o?.offererUserName === offerObj?.offererUserName
-      );
-
-    //send back to the answerer all the iceCandidates we have already collected
-    let client2UserName = sockettoUserNameMap.get(socket.id)
-    ackFunction(offerToUpdate.offerIceCandidates);
-    offerToUpdate.answer = offerObj.answer
-    offerToUpdate.answererUserName = client2UserName
-    //socket has a .to() which allows emiting to a "room"
-    //every socket has it's own room
-    socket.to(client1SocketId).emit("offerresponse",offerToUpdate)
-  });
-
-  socket.on("sendIceCandidateToSignalingServer", (iceCandidateObj) => {
-    const { iceCandidate, didIOffer } = iceCandidateObj;
-
-    if (didIOffer) {
-      let userName = sockettoUserNameMap.get(socket.id);
-      //this ice is coming from the offerer. Send to the answerer
-      const offerInOffers = offers?.find(
-        (o) => o?.offererUserName === userName
-      );
-      if (offerInOffers) {
-        offerInOffers.offerIceCandidates.push(iceCandidate);
-        // 1. When the answerer answers, all existing ice candidates are sent
-        // 2. Any candidates that come in after the offer has been answered, will be passed through
-        if (offerInOffers.answererUserName) {
-          //pass it through to the other socket
-          const socketToSendTo = userNameToSocketMap.get(
-            offerInOffers.answererUserName
-          );
-          if (socketToSendTo) {
-            socket
-              .to(socketToSendTo.socketId)
-              .emit("receivedIceCandidateFromServer", iceCandidate);
-          } else {
-            console.log("Ice candidate recieved but could not find answere");
-          }
-        }
-      }
-    } else {
-      let userName = sockettoUserNameMap.get(socket.id);
-      //this ice is coming from the answerer. Send to the offerer
-      //pass it through to the other socket
-      const offerInOffers = offers?.find(
-        (o) => o.answererUserName === userName
-      );
-      const socketToSendTo = userNameToSocketMap.get(
-        offerInOffers?.offererUserName
-      );
-      if (socketToSendTo) {
-          socket
-          .to(socketToSendTo.socketId)
-          .emit("receivedIceCandidateFromServer", iceCandidate);
-        } else {
-          console.log(socketToSendTo,offerInOffers?.offererUserName,userName)
-        console.log("Ice candidate recieved but could not find offerer");
-      }
+    // already room exists ------
+    if (rooms.get(roomID)) {
+      return createRoom(user1, user2);
     }
+
+    rooms.set(roomID, {
+      user1,
+      user2,
+    });
+
+    socketIdToRoomId.set(usersToSocket.get(user1)?.id ?? "", roomID);
+    socketIdToRoomId.set(usersToSocket.get(user2)?.id ?? "", roomID);
+
+    console.log("Room created for -----", user1, user2);
+
+    usersToSocket.get(user1)?.join(roomID);
+    usersToSocket.get(user2)?.join(roomID);
+
+    io.to(roomID).emit("ConnectionFound", { user1, user2, roomID });
+
+    // create offer --------
+    usersToSocket.get(user1)?.emit("createOffer")
+
+  };
+
+  //  function two -------------------
+  const startPairing = (socket: Socket) => {
+    // get a random other user -------------
+    console.log("queue count -------------", queue.length);
+
+    if (queue.length < 2) {
+      return;
+    }
+
+    // Generate a random index within the range of the array length
+    const randomIndex = Math.floor(Math.random() * queue.length);
+    const randomUser = queue[randomIndex];
+
+    // same iuser ----------
+    if (randomUser === socket.id) {
+      return startPairing(socket);
+    }
+
+    let user1 = socketIdToUser.get(socket.id);
+    let user2 = socketIdToUser.get(randomUser);
+
+    //  remove from queue -------------------------------
+    queue.splice(randomIndex, 1);
+    queue = queue.filter((e) => {
+      e !== socket.id;
+    });
+
+    // if user has left ------------------
+    if (!user1 || !user2) {
+      return startPairing(socket);
+    }
+
+    createRoom(user1, user2);
+  };
+
+  socket.on("user-connect", (name) => {
+    let already = usersToSocket.get(name);
+
+    if (already) {
+      socket.emit("ErrorOccured", "username already in use");
+      return;
+    }
+
+    usersToSocket.set(name, socket);
+    socketIdToUser.set(socket.id, name);
+
+    console.log(
+      "added user --------------------",
+      name,
+      "---- User No - ",
+      usersToSocket.size
+    );
+
+    queue.push(socket.id);
+    socket.emit("GoToWaiting");
+
+    setTimeout(() => {
+      startPairing(socket);
+    }, 1000);
+
   });
+
+
+  socket.on("answerCreated",(answer)=>{
+    const roomID = socketIdToRoomId.get(socket.id)
+    socket.broadcast.to(roomID).emit("answerResponse",answer)
+  })
+
+  socket.on("offerCreated",(offer)=>{
+    const roomID = socketIdToRoomId.get(socket.id)
+    socket.broadcast.to(roomID).emit("createAnswer",offer)
+  })
+
+
+  socket.on("sendIceCandidate",(iceCandidate)=>{
+    const roomID = socketIdToRoomId.get(socket.id)
+    socket.broadcast.to(roomID).emit("gotIceCandidate",iceCandidate)
+  })
+
+
 
   socket.on("disconnect", () => {
-    let name = sockettoUserNameMap.get(socket.id);
-    console.log("User Disconnected", name);
-    userNameToSocketMap.delete(name);
-    sockettoUserNameMap.delete(socket.id);
+    let roomID = socketIdToRoomId.get(socket.id);
+
+    if (roomID) {
+      io.to(roomID).emit("room-destroyed");
+      let bothUser = rooms.get(roomID);
+      let socket1 = usersToSocket.get(bothUser?.user1 ?? "");
+      let socket2 = usersToSocket.get(bothUser?.user2 ?? "");
+      rooms.delete(roomID);
+      socketIdToRoomId.delete(socket1?.id);
+      socketIdToRoomId.delete(socket2?.id);
+
+      if (socket1?.id === socket.id) {
+        socket2?.leave(roomID);
+        queue.push(socket2?.id);
+        startPairing(socket2);
+      } else {
+        socket1?.leave(roomID);
+        queue.push(socket1?.id);
+        startPairing(socket1);
+      }
+    }
+
+    else{
+      queue =queue.filter(id => id !== socket.id)
+    }
+
+    let user = socketIdToUser.get(socket.id);
+    if (user) {
+      usersToSocket.delete(user);
+    }
+    socketIdToUser.delete(socket.id);
+
+    console.log("User Disconnected --- UserCOunt --", usersToSocket.size);
+    console.log("queue count",queue.length)
   });
 });
 

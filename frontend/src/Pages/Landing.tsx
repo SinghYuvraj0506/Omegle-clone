@@ -10,8 +10,10 @@ const Landing: React.FC = () => {
     const handleConnect= (e:React.SyntheticEvent) =>{
         e.preventDefault()
         console.log("Connecting .......")
-        socketState?.socket?.emit("addUser",data)
-        navigate("/lobby")
+        socketState?.socket?.emit("user-connect",data)
+        socketState?.socket.on("GoToWaiting",()=>{
+          navigate("/test")
+        })
     }
 
   return (
