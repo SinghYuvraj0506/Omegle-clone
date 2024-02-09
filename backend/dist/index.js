@@ -4,33 +4,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const http_1 = require("http");
 require("dotenv").config();
 const socket_io_1 = require("socket.io");
 const cors_1 = __importDefault(require("cors"));
+const fs_1 = __importDefault(require("fs"));
+const https_1 = __importDefault(require("https"));
 const PORT = process.env.PORT || 8000;
 const app = (0, express_1.default)();
 // const server = createServer(app);
-// const key = fs.readFileSync("cert.key");
-// const cert = fs.readFileSync("cert.crt");
+const key = fs_1.default.readFileSync("./privKey.pem");
+const cert = fs_1.default.readFileSync("./cert.pem");
 //we changed our express setup so we can use https
 //pass the key and cert to createServer on https
-// const expressServer = https.createServer({ key, cert }, app);
-const expressServer = (0, http_1.createServer)(app);
+const expressServer = https_1.default.createServer({ key, cert }, app);
+// const expressServer = createServer(app);
 const io = new socket_io_1.Server(expressServer, {
     cors: {
         origin: [
             "http://localhost:5173",
-            "https://6fa2-45-118-156-183.ngrok-free.app",
-            process.env.CLIENT_URL
+            "https://livetesting.tech"
         ],
-    },
+        methods: ["GET", "POST"], // Add any other methods you're using
+        allowedHeaders: ["Access-Control-Allow-Origin"], // Add any custom headers you're using
+        credentials: true // Allow credentials if needed
+    }
 });
 app.use((0, cors_1.default)({
     origin: [
         "http://localhost:5173",
-        "https://6fa2-45-118-156-183.ngrok-free.app",
-        process.env.CLIENT_URL
+        "https://livetesting.tech"
     ],
 }));
 let usersToSocket = new Map();
@@ -111,10 +113,12 @@ io.on("connection", (socket) => {
     });
     socket.on("offerCreated", (offer) => {
         const roomID = socketIdToRoomId.get(socket.id);
+        console.log(offer);
         socket.broadcast.to(roomID).emit("createAnswer", offer);
     });
     socket.on("sendIceCandidate", (iceCandidate) => {
         const roomID = socketIdToRoomId.get(socket.id);
+        console.log(iceCandidate);
         socket.broadcast.to(roomID).emit("gotIceCandidate", iceCandidate);
     });
     socket.on("disconnect", () => {

@@ -1,5 +1,5 @@
 import {
-    SetStateAction,
+  SetStateAction,
   createContext,
   useCallback,
   useContext,
@@ -15,20 +15,20 @@ interface SocketContextProps {
   createAnswerAndSetLocal: () => Promise<RTCSessionDescriptionInit | undefined>;
   getLocalStream: () => Promise<MediaStream | undefined>;
   setRemoteDescription: (data: any) => Promise<void>;
-  addPeerIceCandidate: (candidate:any) => Promise<void>
-  remoteStream:MediaStream | undefined
-  setIsOfferer:React.Dispatch<SetStateAction<boolean>>
-
+  addPeerIceCandidate: (candidate: any) => Promise<void>;
+  remoteStream: MediaStream | undefined;
+  setRemoteStream:React.Dispatch<SetStateAction<MediaStream | undefined>>;
+  setIsOfferer: React.Dispatch<SetStateAction<boolean>>;
 }
 
 const RTCPeerContext = createContext<SocketContextProps | null>(null);
 
-export const useRTCPeer = () =>{
-    return useContext(RTCPeerContext)
-}
+export const useRTCPeer = () => {
+  return useContext(RTCPeerContext);
+};
 
 export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
-    const socketState = useSocket()
+  const socketState = useSocket();
   const PeerConnection: RTCPeerConnection = useMemo(
     () =>
       new RTCPeerConnection({
@@ -37,6 +37,9 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
             urls: [
               "stun:stun.l.google.com:19302",
               "stun:stun1.l.google.com:19302",
+              "stun:stun2.l.google.com:19302",
+              "stun:stun3.l.google.com:19302",
+              "stun:stun4.l.google.com:19302",
             ],
           },
         ],
@@ -46,7 +49,7 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
 
   const [remoteStream, setRemoteStream] = useState<MediaStream | undefined>();
 
-  const [isOfferer, setIsOfferer] = useState(true)
+  const [isOfferer, setIsOfferer] = useState(true);
 
   const createOfferAndSetLocal = async () => {
     try {
@@ -101,27 +104,25 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
   };
 
   const addPeerIceCandidate = useCallback(
-    async (candidate) =>{
-        console.log("======Added Peer Ice Candidate======");
-        await PeerConnection.addIceCandidate(candidate)
-      },
-    [PeerConnection],
-  )
-  
+    async (candidate) => {
+      console.log("======Added Peer Ice Candidate======");
+      await PeerConnection.addIceCandidate(candidate);
+    },
+    [PeerConnection]
+  );
+
   const addTrackToRemoteStream = useCallback((e: RTCTrackEvent) => {
     // setting the remote stream --------------------
-    console.log("Got the peer track")
+    console.log("Got the peer track");
     setRemoteStream(e?.streams[0]);
   }, []);
-
 
   const getMyIceCandidate = useCallback((e: RTCPeerConnectionIceEvent) => {
     console.log("........My Ice candidate found!......");
     if (e.candidate) {
-        socketState?.socket.emit("sendIceCandidate", e.candidate);
-      }
+      socketState?.socket.emit("sendIceCandidate", e.candidate);
+    }
   }, []);
-
 
   useEffect(() => {
     PeerConnection.addEventListener("track", addTrackToRemoteStream);
@@ -131,8 +132,7 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
       PeerConnection.removeEventListener("track", addTrackToRemoteStream);
       PeerConnection.removeEventListener("icecandidate", getMyIceCandidate);
     };
-  }, [PeerConnection,addTrackToRemoteStream,getMyIceCandidate]);
-
+  }, [PeerConnection, addTrackToRemoteStream, getMyIceCandidate]);
 
   return (
     <RTCPeerContext.Provider
@@ -144,7 +144,8 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
         setRemoteDescription,
         addPeerIceCandidate,
         remoteStream,
-        setIsOfferer
+        setIsOfferer,
+        setRemoteStream
       }}
     >
       {props?.children}

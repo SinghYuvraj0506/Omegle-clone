@@ -17,8 +17,7 @@ export const useSocket = () => {
 
 export const SocketProvider: React.FC<ContextProviderProps> = (props) => {
   // const socket = useMemo(()=>{io("http://localhost:8000")},[])
-  // const socket = io("https://localhost:8000")
-  const socket = io("http://ec2-65-1-148-114.ap-south-1.compute.amazonaws.com:8000");
+  const socket = io(import.meta.env.VITE_SERVER_URL);
 
   useEffect(() => {
     socket.on("ErrorOccured", (error) => {

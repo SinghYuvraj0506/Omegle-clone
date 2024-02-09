@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 // const server = createServer(app);
 
-// const key = fs.readFileSync("cert.key");
-// const cert = fs.readFileSync("cert.crt");
+const key = fs.readFileSync("./privKey.pem");
+const cert = fs.readFileSync("./cert.pem");
 
 //we changed our express setup so we can use https
 //pass the key and cert to createServer on https
@@ -23,8 +23,7 @@ const io = new Server(expressServer, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "https://6fa2-45-118-156-183.ngrok-free.app",
-      "https://omegle-clone-tg2i.vercel.app"
+      "https://livetesting.tech"
     ],
     methods: ["GET", "POST"], // Add any other methods you're using
     allowedHeaders: ["Access-Control-Allow-Origin"], // Add any custom headers you're using
@@ -37,8 +36,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://6fa2-45-118-156-183.ngrok-free.app",
-      "https://omegle-clone-tg2i.vercel.app"
+      "https://livetesting.tech"
     ],
   })
 );
@@ -161,6 +159,12 @@ io.on("connection", (socket) => {
   socket.on("offerCreated",(offer)=>{
     const roomID = socketIdToRoomId.get(socket.id)
     socket.broadcast.to(roomID).emit("createAnswer",offer)
+  })
+
+  socket.on("sendNewMessage",(msg)=>{
+    let roomId = socketIdToRoomId.get(socket.id)
+    let sender = socketIdToUser.get(socket.id)
+    io.to(roomId).emit("gotNewMessage",{msg,from:sender})
   })
 
 
