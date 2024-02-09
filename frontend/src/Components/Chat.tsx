@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { useSocket } from "../Providers/Socket";
+import { useUser } from "../Providers/User";
 
 const ChatFooter: React.FC<{ disabled: boolean }> = ({ disabled }) => {
   const [data, setdata] = useState<string | undefined>();
@@ -78,6 +79,7 @@ const MessageBox: React.FC<MessageProps> = ({ text, isUser }) => {
 const Chat = ({ connectionData, joined }) => {
   const [messages, setMessages] = useState<MessageObj[]>([]);
   const socketState = useSocket();
+  const userState = useUser()
 
   useEffect(() => {
     socketState?.socket.on("gotNewMessage", (data) => {
@@ -97,16 +99,16 @@ const Chat = ({ connectionData, joined }) => {
       <div className=" min-h-[90%] h-[90%] w-full overflow-auto text-[#cacacb] flex gap-3 flex-col">
         <h1 className="text-xl font-bold">
           {joined
-            ? `Connected ${
-                connectionData?.user1 + " & " + connectionData?.user2
-              }....`
+            ? `Connected to ${
+                userState === connectionData?.user1 ? connectionData?.user2 : connectionData?.user1
+              }`
             : connectionData
             ? "Connecting Please Wait...."
             : "Please wait while we connect you with someone.."}
         </h1>
 
         {messages?.map((e) => {
-          return <MessageBox text={e.msg} isUser={true} />;
+            return <MessageBox text={e.msg} isUser={e.from === userState?.user} />;
         })}
       </div>
       <ChatFooter disabled={!joined} />

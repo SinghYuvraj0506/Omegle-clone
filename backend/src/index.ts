@@ -170,7 +170,7 @@ io.on("connection", (socket) => {
 
   socket.on("sendIceCandidate",(iceCandidate)=>{
     const roomID = socketIdToRoomId.get(socket.id)
-    socket.broadcast.to(roomID).emit("gotIceCandidate",iceCandidate)
+    socket.broadcast.to(roomID).emit("gotIceCandidate",{...iceCandidate,from:socketIdToUser.get(socket.id)})
   })
 
 

@@ -1,24 +1,21 @@
-import React, { createContext, useContext, useState } from "react";
-import { Socket } from "socket.io-client";
+import React, { SetStateAction, createContext, useContext, useState } from "react";
 import { ContextProviderProps } from "./Socket";
 
-interface SocketContextProps {
-  socket: Socket;
+interface UserContextProps {
+  user:string | null,
+  setUser:React.Dispatch<SetStateAction<string | null>>
 }
 
-const UserContext = createContext<SocketContextProps | null>(null);
+const UserContext = createContext<UserContextProps | null>(null);
 
 export const useUser = () => {
   return useContext(UserContext);
 };
 
-// export const UserProvider: React.FC<ContextProviderProps> = (props) => {
+export const UserProvider: React.FC<ContextProviderProps> = (props) => {
+    const [user, setUser] = useState<string | null>(null)
 
-//     const [user, setUser] = useState()
-
-//     return <UserContext.Provider value={{}}>
-
-//     </UserContext.Provider>
-
-
-// }
+    return <UserContext.Provider value={{setUser,user}}>
+      {props.children}
+    </UserContext.Provider>
+}

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSocket } from "../Providers/Socket";
-import ReactPlayer from "react-player";
 import Room from "./Room";
 import { useRTCPeer } from "../Providers/RTCPeer";
 
@@ -27,7 +26,7 @@ const Wait = () => {
     socketState?.socket.on("ConnectionFound", (data) => {
       setConnectionData(data);
     });
-
+    
     socketState?.socket.on("createOffer", async () => {
       console.log("creating offer.....");
       await getLocalStream();
@@ -54,10 +53,13 @@ const Wait = () => {
       }, 500);
     });
 
-    socketState?.socket.on("gotIceCandidate", async (iceCandidate) => {
-      if(iceCandidate){
-        await peerState?.addPeerIceCandidate(iceCandidate);
-      }
+    socketState?.socket.on("gotIceCandidate", async (data) => {
+      const candidate = new RTCIceCandidate({
+        sdpMLineIndex:data.label,
+        candidate:data.candidate
+      })
+      console.log("GOT Ice candidate from " + data?.from ,candidate)
+      await peerState?.addPeerIceCandidate(candidate);
     });
 
     socketState?.socket.on("room-destroyed", () => {

@@ -3,7 +3,9 @@ import React from 'react'
 const Navbar = () => {
   return (
     <div className='w-screen px-[10vw] box-border flex items-center justify-between py-5 border-b bg-black border-b-[#181819] sticky top-0'>
-      <img src="/logo.png" alt="logo" className='w-14'/>
+      <h1 className="text-white z-10 font-sans uppercase font-bold text-4xl tracking-[5px]">
+          TALKIE
+        </h1>
 
       <div>
         <button className='bg-[#262629] rounded-lg py-2 px-5 text-[#cacacb] hover:bg-[#2f2f33] flex items-center gap-4' onClick={()=>{
