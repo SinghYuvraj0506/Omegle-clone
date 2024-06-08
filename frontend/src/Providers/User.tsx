@@ -1,5 +1,4 @@
 import React, { SetStateAction, createContext, useContext, useState } from "react";
-import { ContextProviderProps } from "./Socket";
 
 interface UserContextProps {
   user:string | null,
@@ -12,7 +11,7 @@ export const useUser = () => {
   return useContext(UserContext);
 };
 
-export const UserProvider: React.FC<ContextProviderProps> = (props) => {
+export const UserProvider: React.FC = (props) => {
     const [user, setUser] = useState<string | null>(null)
 
     return <UserContext.Provider value={{setUser,user}}>

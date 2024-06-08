@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useSocket } from "../Providers/Socket";
 import Room from "./Room";
 import { useRTCPeer } from "../Providers/RTCPeer";
+import { useSocket } from "../Providers/SocketProvider";
 
 const Wait = () => {
   const socketState = useSocket();

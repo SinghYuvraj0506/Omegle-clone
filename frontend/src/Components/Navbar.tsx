@@ -1,21 +1,36 @@
-import React from 'react'
+import React from "react";
+import { AiFillInstagram } from "react-icons/ai";
+import { FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 
 const Navbar = () => {
   return (
-    <div className='w-screen px-[10vw] box-border flex items-center justify-between py-5 border-b bg-black border-b-[#181819] sticky top-0'>
-      <h1 className="text-white z-10 font-sans uppercase font-bold text-4xl tracking-[5px]">
-          TALKIE
-        </h1>
+    <div className="w-screen px-[4vw] md:px-[10vw] box-border flex items-center justify-between py-5 border-b bg-black border-b-[#181819] sticky top-0">
+      <h1 className="text-white z-10 font-sans uppercase font-bold text-2xl md:text-4xl tracking-[5px] cursor-pointer" onClick={()=>{window.open("/","_self")}}>
+        TALKIE
+      </h1>
 
-      <div>
-        <button className='bg-[#262629] rounded-lg py-2 px-5 text-[#cacacb] hover:bg-[#2f2f33] flex items-center gap-4' onClick={()=>{
-          window.open("https://www.instagram.com/ssinghyuvraj02/")
-        }}>
-          <img src="/my.png" alt="" className='w-10 h-10 rounded-full'/>
-          Follow on Instagram</button>
+      <div className="text-white flex items-center justify-center gap-5 text-2xl ">
+        <AiFillInstagram
+          className="cursor-pointer"
+          onClick={() => {
+            window.open("https://www.instagram.com/ssinghyuvraj02/");
+          }}
+        />
+        <FaLinkedinIn
+          className="cursor-pointer"
+          onClick={() => {
+            window.open("https://www.linkedin.com/in/singh-yuvraj002/");
+          }}
+        />
+        <FaXTwitter
+          className="cursor-pointer"
+          onClick={() => {
+            window.open("https://twitter.com/Yuvrajsingh0506");
+          }}
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

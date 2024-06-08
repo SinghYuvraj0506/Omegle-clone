@@ -4,8 +4,8 @@ import App from "./App.tsx";
 import "./index.css";
 import { UserProvider } from "./Providers/User.tsx";
 import { BrowserRouter } from "react-router-dom";
-import { SocketProvider } from "./Providers/Socket.tsx";
 import { RTCPeerProvider } from "./Providers/RTCPeer.tsx";
+import SocketProvider from "./Providers/SocketProvider.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

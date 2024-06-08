@@ -10,6 +10,7 @@ import { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useUser } from "./Providers/User";
 import Protectedroute from "./Components/Protectedroute";
+import Lobby from "./Pages/Lobby";
 
 function App() {
   const userState = useUser();
@@ -21,9 +22,10 @@ function App() {
         <Route
           path="/lobby"
           element={
-            <Protectedroute navigateCondition={!userState?.user} toUrl="/">
-              <Wait />
-            </Protectedroute>
+            // <Protectedroute navigateCondition={!userState?.user} toUrl="/">
+            //   <Wait />
+            // </Protectedroute>
+            <Lobby/>
           }
         />
       </Routes>

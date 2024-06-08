@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { ContextProviderProps, useSocket } from "./Socket";
+import { ContextProviderProps, useSocket } from "./SocketProvider";
 
 interface SocketContextProps {
   PeerConnection: RTCPeerConnection;
@@ -29,17 +29,15 @@ export const useRTCPeer = () => {
 
 export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
   const socketState = useSocket();
+
   const PeerConnection: RTCPeerConnection = useMemo(
     () =>
       new RTCPeerConnection({
         iceServers: [
           {
             urls: [
-              "stun:stun.l.google.com:19302",
-              "stun:stun1.l.google.com:19302",
-              "stun:stun2.l.google.com:19302",
-              "stun:stun3.l.google.com:19302",
-              "stun:stun4.l.google.com:19302",
+              "stun:stun1.1.google.com:19302",
+              "stun:stun2.1.google.com:19302"
             ],
           },
         ],
@@ -53,10 +51,8 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
 
   const createOfferAndSetLocal = async () => {
     try {
-      console.log("Creating Offer ....");
       const offer = await PeerConnection.createOffer();
 
-      console.log("Setting Local Description .........");
       await PeerConnection.setLocalDescription(offer);
 
       return offer;
@@ -81,7 +77,6 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
 
   const getLocalStream = async () => {
     try {
-      console.log("Fetching the local stream");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
@@ -103,17 +98,13 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
     await PeerConnection?.setRemoteDescription(data);
   };
 
-  const addPeerIceCandidate = useCallback(
-    async (candidate) => {
+  const addPeerIceCandidate = (async (candidate:RTCIceCandidate) => {
       console.log("======Added Peer Ice Candidate======");
       await PeerConnection.addIceCandidate(candidate);
-    },
-    [PeerConnection]
+    }
   );
 
   const addTrackToRemoteStream = useCallback((e: RTCTrackEvent) => {
-    // setting the remote stream --------------------
-    console.log("Got the peer track");
     setRemoteStream(e?.streams[0]);
   }, []);
 
@@ -129,15 +120,15 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
     }
   }, []);
 
-  useEffect(() => {
-    PeerConnection.addEventListener("track", addTrackToRemoteStream);
-    PeerConnection.addEventListener("icecandidate", getMyIceCandidate);
+  // useEffect(() => {
+  //   PeerConnection.addEventListener("track", addTrackToRemoteStream);
+  //   PeerConnection.addEventListener("icecandidate", getMyIceCandidate);
 
-    return () => {
-      PeerConnection.removeEventListener("track", addTrackToRemoteStream);
-      PeerConnection.removeEventListener("icecandidate", getMyIceCandidate);
-    };
-  }, [PeerConnection, addTrackToRemoteStream, getMyIceCandidate]);
+  //   return () => {
+  //     PeerConnection.removeEventListener("track", addTrackToRemoteStream);
+  //     PeerConnection.removeEventListener("icecandidate", getMyIceCandidate);
+  //   };
+  // }, [PeerConnection, addTrackToRemoteStream, getMyIceCandidate]);
 
   return (
     <RTCPeerContext.Provider

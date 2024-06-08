@@ -4,26 +4,17 @@ require("dotenv").config();
 import { Server, Socket } from "socket.io";
 import cors from "cors";
 import fs from "fs";
-import https from "https";
 
 const PORT = process.env.PORT || 8000;
 
 const app = express();
-// const server = createServer(app);
 
-const key = fs.readFileSync("./privKey.pem");
-const cert = fs.readFileSync("./cert.pem");
-
-//we changed our express setup so we can use https
-//pass the key and cert to createServer on https
-// const expressServer = https.createServer({ key, cert }, app);
 const expressServer = createServer(app);
 
 const io = new Server(expressServer, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "https://livetesting.tech"
     ],
     methods: ["GET", "POST"], // Add any other methods you're using
     allowedHeaders: ["Access-Control-Allow-Origin"], // Add any custom headers you're using

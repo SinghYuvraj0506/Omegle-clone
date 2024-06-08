@@ -113,13 +113,16 @@ io.on("connection", (socket) => {
     });
     socket.on("offerCreated", (offer) => {
         const roomID = socketIdToRoomId.get(socket.id);
-        console.log(offer);
         socket.broadcast.to(roomID).emit("createAnswer", offer);
+    });
+    socket.on("sendNewMessage", (msg) => {
+        let roomId = socketIdToRoomId.get(socket.id);
+        let sender = socketIdToUser.get(socket.id);
+        io.to(roomId).emit("gotNewMessage", { msg, from: sender });
     });
     socket.on("sendIceCandidate", (iceCandidate) => {
         const roomID = socketIdToRoomId.get(socket.id);
-        console.log(iceCandidate);
-        socket.broadcast.to(roomID).emit("gotIceCandidate", iceCandidate);
+        socket.broadcast.to(roomID).emit("gotIceCandidate", Object.assign(Object.assign({}, iceCandidate), { from: socketIdToUser.get(socket.id) }));
     });
     socket.on("disconnect", () => {
         var _a, _b;
