@@ -21,6 +21,10 @@ const SocketProvider: React.FC<ContextProviderProps> = (props) => {
   const URL = import.meta.env.VITE_SERVER_URL as string;
   const socket = io(URL, {
     autoConnect: false,
+    withCredentials:true,
+    extraHeaders: {
+      "Content-Type": "application/json"
+    }
   });
 
   const [connectionState, setConnectionState] = useState(false)
