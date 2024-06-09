@@ -32,8 +32,8 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
   let iceServers:[] = null
 
   // Define your Twilio credentials
-  const TWILIO_ACCOUNT_SID = "AC0086449a558461d5e4b7f0d1582247b1";
-  const TWILIO_AUTH_TOKEN = "34e203ec897c19fe42f2d96ec097e5a9";
+  const TWILIO_ACCOUNT_SID = import.meta.env.VITE_TWILIO_SID;
+  const TWILIO_AUTH_TOKEN = import.meta.env.VITE_TWILIO_AUTH;
 
   // Encode the credentials for basic authentication
   const basicAuth =
