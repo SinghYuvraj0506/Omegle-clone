@@ -48,15 +48,18 @@ const Lobby: React.FC = () => {
     }
 
     function reciveOffer(data: any) {
+      console.log("Recieced offer",data)
       remoteUser = data?.sender;
       getStramAndCreateAnswer(data);
     }
 
     async function reciveAnswer(data: any) {
+      console.log("Recieced answer",data)
       await peerState?.setRemoteDescription(data);
     }
 
     async function setIceCandidate(data:any) {
+      console.log("Set ice candidate",data)
       await peerState?.addPeerIceCandidate(data)
     }
 
