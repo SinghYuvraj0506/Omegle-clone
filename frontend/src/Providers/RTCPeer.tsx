@@ -17,7 +17,7 @@ interface SocketContextProps {
   setRemoteDescription: (data: any) => Promise<void>;
   addPeerIceCandidate: (candidate: any) => Promise<void>;
   remoteStream: MediaStream | undefined;
-  setRemoteStream:React.Dispatch<SetStateAction<MediaStream | undefined>>;
+  setRemoteStream: React.Dispatch<SetStateAction<MediaStream | undefined>>;
   setIsOfferer: React.Dispatch<SetStateAction<boolean>>;
 }
 
@@ -36,9 +36,32 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
         iceServers: [
           {
             urls: [
-"stun:stun1.l.google.com:19302",
-"stun:stun2.l.google.com:19302",
+              "stun:stun1.l.google.com:19302",
+              "stun:stun2.l.google.com:19302",
             ],
+          },
+          {
+            urls: "stun:stun.relay.metered.ca:80",
+          },
+          {
+            urls: "turn:global.relay.metered.ca:80",
+            username: "6df56743128197bc323aec86",
+            credential: "eVNvLHeZ26dtNiN6",
+          },
+          {
+            urls: "turn:global.relay.metered.ca:80?transport=tcp",
+            username: "6df56743128197bc323aec86",
+            credential: "eVNvLHeZ26dtNiN6",
+          },
+          {
+            urls: "turn:global.relay.metered.ca:443",
+            username: "6df56743128197bc323aec86",
+            credential: "eVNvLHeZ26dtNiN6",
+          },
+          {
+            urls: "turns:global.relay.metered.ca:443?transport=tcp",
+            username: "6df56743128197bc323aec86",
+            credential: "eVNvLHeZ26dtNiN6",
           },
         ],
       }),
@@ -98,11 +121,10 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
     await PeerConnection?.setRemoteDescription(data);
   };
 
-  const addPeerIceCandidate = (async (candidate:RTCIceCandidate) => {
-      console.log("======Added Peer Ice Candidate======");
-      await PeerConnection.addIceCandidate(candidate);
-    }
-  );
+  const addPeerIceCandidate = async (candidate: RTCIceCandidate) => {
+    console.log("======Added Peer Ice Candidate======");
+    await PeerConnection.addIceCandidate(candidate);
+  };
 
   const addTrackToRemoteStream = useCallback((e: RTCTrackEvent) => {
     setRemoteStream(e?.streams[0]);
@@ -112,10 +134,10 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
     console.log("........My Ice candidate found!......");
     if (e.candidate) {
       socketState?.socket.emit("sendIceCandidate", {
-        type:"candidate",
-        label:e.candidate.sdpMLineIndex,
-        id:e.candidate.sdpMid,
-        candidate:e.candidate.candidate
+        type: "candidate",
+        label: e.candidate.sdpMLineIndex,
+        id: e.candidate.sdpMid,
+        candidate: e.candidate.candidate,
       });
     }
   }, []);
@@ -141,7 +163,7 @@ export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
         addPeerIceCandidate,
         remoteStream,
         setIsOfferer,
-        setRemoteStream
+        setRemoteStream,
       }}
     >
       {props?.children}
