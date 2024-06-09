@@ -212,9 +212,3 @@ const Lobby: React.FC = () => {
 
 export default Lobby;
 
-
-candidate:1556512362 1 udp 1685987071 152.58.123.52 50045 typ srflx raddr 0.0.0.0 rport 50045 generation 0 ufrag gB1L network-id 1 network-cost 900
-candidate:1308893851 1 udp 1686052607 45.118.156.230 62866 typ srflx raddr 192.168.1.3 rport 62866 generation 0 ufrag ph9u network-id 1 network-cost 10
-
-candidate:2710118439 1 tcp 1518283007 2409:40d0:1022:89bd:557f:1d9d:ad6a:af7d 9 typ host tcptype active generation 0 ufrag gB1L network-id 2 network-cost 900
-candidate:646401316 1 tcp 1518280447 192.168.1.3 9 typ host tcptype active generation 0 ufrag ph9u network-id 1 network-cost 10
