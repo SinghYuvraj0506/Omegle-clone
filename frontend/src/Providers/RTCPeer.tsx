@@ -3,7 +3,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -30,15 +29,49 @@ export const useRTCPeer = () => {
 export const RTCPeerProvider: React.FC<ContextProviderProps> = (props) => {
   const socketState = useSocket();
 
+  let iceServers:[] = null
+
+  // Define your Twilio credentials
+  const TWILIO_ACCOUNT_SID = "AC0086449a558461d5e4b7f0d1582247b1";
+  const TWILIO_AUTH_TOKEN = "34e203ec897c19fe42f2d96ec097e5a9";
+
+  // Encode the credentials for basic authentication
+  const basicAuth =
+    "Basic " + btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+
+  // Define the URL for the POST request
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Tokens.json`;
+
+  // Make the fetch request
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: basicAuth,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok " + response.statusText);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      iceServers = data?.ice_servers
+      console.log(data?.ice_servers)
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
   const PeerConnection: RTCPeerConnection = useMemo(
     () =>
       new RTCPeerConnection({
-        iceServers: [
+        iceServers: iceServers ?? [
           {
             urls: "stun:stun1.l.google.com:19302",
           },
           {
-            urls: "stun:stun2.l.google.com:19302"
+            urls: "stun:stun2.l.google.com:19302",
           },
           // {
           //   urls: "stun:stun.relay.metered.ca:80",
